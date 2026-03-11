@@ -10,6 +10,7 @@ on:
       - "helm/**"
       - "Dockerfile"
       - "src/**"
+      - ".github/workflows/deploy.yml"
 
 env:
   IMAGE_NAME: pumpkin-api
