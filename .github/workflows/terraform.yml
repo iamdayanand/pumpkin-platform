@@ -4,12 +4,11 @@ on:
   push:
     paths:
       - "terraform/**"
+      - ".github/workflows/terraform.yml"
     branches:
       - dev
       - main
-    paths:
-      - "terraform/**"
-      - ".github/workflows/terraform.yml"
+      
 
 env:
   KEYVAULT_NAME: pumpkin-kv
@@ -131,4 +130,3 @@ jobs:
         run: terraform apply -auto-approve
 
 
-        
