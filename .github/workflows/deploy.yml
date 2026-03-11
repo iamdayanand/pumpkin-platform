@@ -6,6 +6,11 @@ on:
       - dev
       - main
 
+    paths:
+      - "helm/**"
+      - "Dockerfile"
+      - "src/**"
+
 env:
   IMAGE_NAME: pumpkin-api
   KEYVAULT_NAME: pumpkin-kv
