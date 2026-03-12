@@ -99,7 +99,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} .
+        docker build -t pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} .
 
 # ==================================================
 # STAGE 4 — Container Image Scan
@@ -131,7 +131,7 @@ jobs:
 
     - name: Push Docker Image
       run: |
-        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+        docker push pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
 # ==================================================
 # STAGE 6 — Deploy to AKS with Helm
@@ -173,12 +173,14 @@ jobs:
       run: |
         if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
           helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-            --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
+            --atomic \
+            --set image.repository=pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }} \
             --set image.tag=${{ github.sha }} \
             -f helm/pumpkin-api/values-dev.yaml
         else
           helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-            --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
+            --atomic \
+            --set image.repository=pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }} \
             --set image.tag=${{ github.sha }} \
             -f helm/pumpkin-api/values-prod.yaml
         fi
