@@ -2,17 +2,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: pumpkin-api
-  spec:
-    ingressClassName: nginx
+  labels:
+    app: pumpkin-api
+
 spec:
+  ingressClassName: nginx
+
   rules:
-    - host: pumpkin.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: pumpkin-api
-                port:
-                  number: 80
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pumpkin-api
+            port:
+              number: 80
