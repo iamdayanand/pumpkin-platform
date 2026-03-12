@@ -4,7 +4,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   resource_group_name = var.resource_group
   dns_prefix          = "pumpkin"
 
-  private_cluster_enabled = true
+  #private_cluster_enabled = true
+  private_cluster_enabled = false
 
   tags = var.tags
 
