@@ -27,23 +27,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    # Dependency Scan
-    - name: OWASP Dependency Check
-      uses: dependency-check/Dependency-Check_Action@main
-      with:
-        project: "pumpkin-api"
-        path: "."
-        format: "HTML"
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: pumpkin-api
+          path: .
+          format: HTML
 
-    # Filesystem Scan
-    - name: Trivy Filesystem Scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: fs
-        scan-ref: .
+      - name: Trivy Filesystem Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
 
 # ==================================================
 # STAGE 2 — Dockerfile Lint
@@ -53,139 +51,131 @@ jobs:
     needs: security
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Dockerfile Lint
-      uses: hadolint/hadolint-action@v3.1.0
-      with:
-        dockerfile: Dockerfile
+      - name: Dockerfile Lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
 
 # ==================================================
-# STAGE 3 — Build Image
+# STAGE 3 — Build Docker Image
 # ==================================================
   build:
     runs-on: ubuntu-latest
     needs: dockerfile-lint
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Get Secrets from Key Vault
-      uses: azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT_NAME }}
-        secrets: acr-login-server
+      - name: Login to ACR
+        run: |
+          az acr login --name $ACR_NAME
 
-    - name: Login to ACR
-      run: |
-        az acr login --name $ACR_NAME
-
-    - name: Build Docker Image
-      run: |
-        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} .
-
-    - name: Push Docker Image
-      run: |
-        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+      - name: Build Docker Image
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} .
 
 # ==================================================
-# STAGE 4 — Container Image Scan
+# STAGE 4 — Push Image to ACR
 # ==================================================
+  push-image:
+    runs-on: ubuntu-latest
+    needs: build
 
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: |
+          az acr login --name $ACR_NAME
+
+      - name: Push Docker Image
+        run: |
+          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+
+# ==================================================
+# STAGE 5 — Container Image Scan
+# ==================================================
   image-scan:
     runs-on: ubuntu-latest
     needs: push-image
 
     steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login to ACR
+        run: |
+          az acr login --name $ACR_NAME
 
-    - name: Login to ACR
-      run: |
-        az acr login --name $ACR_NAME
-
-    - name: Trivy Image Scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        severity: CRITICAL,HIGH
-        exit-code: "1"
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          exit-code: "1"
 
 # ==================================================
-# STAGE 5 — Push Image
+# STAGE 6 — Deploy to AKS using Helm
 # ==================================================
-  push-image:
+  deploy:
     runs-on: ubuntu-latest
     needs: image-scan
 
     steps:
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Push Docker Image
-      run: |
-        docker push pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-# ==================================================
-# STAGE 6 — Deploy to AKS with Helm
-# ==================================================
-  deploy:
-    runs-on: ubuntu-latest
-    needs: push-image
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Connect to AKS
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            az aks get-credentials \
+              --resource-group pumpkin-dev-rg \
+              --name pumpkin-dev-aks \
+              --overwrite-existing
+          else
+            az aks get-credentials \
+              --resource-group pumpkin-prod-rg \
+              --name pumpkin-prod-aks \
+              --overwrite-existing
+          fi
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-
-    - name: Install Helm
-      uses: azure/setup-helm@v4
-
-    - name: Connect to AKS
-      run: |
-        if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-          az aks get-credentials \
-            --resource-group pumpkin-dev-rg \
-            --name pumpkin-dev-aks \
-            --overwrite-existing
-        else
-          az aks get-credentials \
-            --resource-group pumpkin-prod-rg \
-            --name pumpkin-prod-aks \
-            --overwrite-existing
-        fi
-
-    - name: Helm Deploy
-      run: |
-        if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-          helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-            --atomic \
-            --set image.repository=pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ github.sha }} \
-            -f helm/pumpkin-api/values-dev.yaml
-        else
-          helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-            --atomic \
-            --set image.repository=pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ github.sha }} \
-            -f helm/pumpkin-api/values-prod.yaml
-        fi
+      - name: Helm Deploy
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            helm upgrade --install pumpkin-api ./helm/pumpkin-api \
+              --atomic \
+              --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
+              --set image.tag=${{ github.sha }} \
+              -f helm/pumpkin-api/values-dev.yaml
+          else
+            helm upgrade --install pumpkin-api ./helm/pumpkin-api \
+              --atomic \
+              --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
+              --set image.tag=${{ github.sha }} \
+              -f helm/pumpkin-api/values-prod.yaml
+          fi
