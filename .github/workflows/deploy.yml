@@ -15,8 +15,8 @@ on:
 env:
   IMAGE_NAME: pumpkin-api
   KEYVAULT_NAME: pumpkin-kv
-  acr-name: pumpkindevacr
-  acr-login-server: pumpkindevacr.azurecr.io
+  ACR_NAME: pumpkindevacr
+  ACR_LOGIN_SERVER: pumpkindevacr.azurecr.io
 
 jobs:
 
@@ -85,15 +85,15 @@ jobs:
 
     - name: Login to ACR
       run: |
-        az acr login --name ${{ steps.kv.outputs.acr-login-server }}
+        az acr login --name $ACR_NAME
 
     - name: Build Docker Image
       run: |
-        docker build -t ${{ steps.kv.outputs.acr-login-server }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} .
 
     - name: Push Docker Image
       run: |
-        docker push ${{ steps.kv.outputs.acr-login-server }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
 
 # ==================================================
 # STAGE 4 — Container Image Scan
