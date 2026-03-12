@@ -94,7 +94,7 @@ jobs:
       # Terraform Plan
       # -----------------------------
       - name: Terraform Plan
-        run: terraform plan -lock-timeout=5m -var="location=westeurope"
+        run: terraform plan -input=false -lock-timeout=5m -var="location=westeurope"
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
@@ -105,7 +105,7 @@ jobs:
       # Terraform Apply
       # -----------------------------
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -input=false -auto-approve
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
@@ -189,7 +189,7 @@ jobs:
       # Terraform Plan
       # -----------------------------
       - name: Terraform Plan
-        run: terraform plan -lock-timeout=5m -var="location=westeurope"
+        run: terraform plan -input=false -lock-timeout=5m -var="location=westeurope"
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
@@ -200,7 +200,7 @@ jobs:
       # Terraform Apply
       # -----------------------------
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -input=false -auto-approve
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
