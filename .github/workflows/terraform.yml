@@ -144,7 +144,7 @@ jobs:
         uses: azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEYVAULT_NAME }}
-          secrets: ARM_CLIENT_ID,ARM_CLIENT_SECRET
+          secrets: arm_client_id,arm_client_secret
 
       # -----------------------------
       # Terraform Init
