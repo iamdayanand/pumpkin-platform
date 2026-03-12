@@ -83,11 +83,15 @@ jobs:
 
     - name: Login to ACR
       run: |
-        az acr login --name $ACR_LOGIN_SERVER
+        az acr login --name ${{ steps.kv.outputs.acr-login-server }}
 
     - name: Build Docker Image
       run: |
-        docker build -t pumpkindevacr.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker build -t ${{ steps.kv.outputs.acr-login-server }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+    - name: Push Docker Image
+      run: |
+        docker push ${{ steps.kv.outputs.acr-login-server }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
 # ==================================================
 # STAGE 4 — Container Image Scan
