@@ -34,6 +34,7 @@ jobs:
       with:
         project: "pumpkin-api"
         path: "."
+        format: "HTML"
 
     # Filesystem Scan
     - name: Trivy Filesystem Scan
