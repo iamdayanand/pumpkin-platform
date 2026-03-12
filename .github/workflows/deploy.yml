@@ -15,8 +15,10 @@ on:
 env:
   IMAGE_NAME: pumpkin-api
   KEYVAULT_NAME: pumpkin-kv
-  ACR_NAME: pumpkindevacr
-  ACR_LOGIN_SERVER: pumpkindevacr.azurecr.io
+  DEV_ACR_NAME: pumpkindevacr
+  DEV_ACR_LOGIN_SERVER: pumpkindevacr.azurecr.io
+  PROD_ACR_NAME: pumpkinprodacr
+  PROD_ACR_LOGIN: pumpkinprodacr.azurecr.io
 
 jobs:
 
@@ -75,14 +77,36 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # ---------------------------------
+      # Select ACR based on branch
+      # ---------------------------------
+      - name: Select ACR
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            echo "ACR_NAME=pumpkindevacr" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=pumpkindevacr.azurecr.io" >> $GITHUB_ENV
+          else
+            echo "ACR_NAME=pumpkinprodacr" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=pumpkinprodacr.azurecr.io" >> $GITHUB_ENV
+          fi
+
+      # ---------------------------------
+      # Login to ACR
+      # ---------------------------------
       - name: Login to ACR
         run: |
           az acr login --name $ACR_NAME
 
+      # ---------------------------------
+      # Build Docker Image
+      # ---------------------------------
       - name: Build Docker Image
         run: |
           docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} .
 
+      # ---------------------------------
+      # Push Docker Image
+      # ---------------------------------
       - name: Push Docker Image
         run: |
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
