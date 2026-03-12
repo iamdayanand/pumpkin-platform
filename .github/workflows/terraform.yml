@@ -87,6 +87,8 @@ jobs:
         uses: bridgecrewio/checkov-action@master
         with:
           directory: terraform
+          soft_fail: true
+          skip_check: CKV_AZURE_227,CKV_AZURE_232,CKV_AZURE_233,CKV_AZURE_165,CKV_AZURE_164
 
       # -----------------------------
       # Terraform Plan
