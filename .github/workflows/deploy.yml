@@ -60,7 +60,7 @@ jobs:
           dockerfile: Dockerfile
 
 # ==================================================
-# STAGE 3 — Build Docker Image
+# STAGE 3 — Build and Push Docker Image
 # ==================================================
   build:
     runs-on: ubuntu-latest
@@ -89,30 +89,14 @@ jobs:
 # ==================================================
 # STAGE 4 — Push Image to ACR
 # ==================================================
-  push-image:
-    runs-on: ubuntu-latest
-    needs: build
 
-    steps:
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Login to ACR
-        run: |
-          az acr login --name $ACR_NAME
-
-      - name: Push Docker Image
-        run: |
-          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
-          
 # ==================================================
 # STAGE 5 — Container Image Scan
 # ==================================================
   image-scan:
     runs-on: ubuntu-latest
-    needs: push-image
+    needs: build
 
     steps:
       - name: Azure Login
