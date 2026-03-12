@@ -28,27 +28,14 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # --------------------------
-    # SAST - SonarQube
-    # --------------------------
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-    # --------------------------
-    # Dependency Scan (SCA)
-    # --------------------------
+    # Dependency Scan
     - name: OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
       with:
         project: "pumpkin-api"
         path: "."
 
-    # --------------------------
-    # Filesystem Security Scan
-    # --------------------------
+    # Filesystem Scan
     - name: Trivy Filesystem Scan
       uses: aquasecurity/trivy-action@master
       with:
