@@ -106,7 +106,7 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
-
+          
 # ==================================================
 # STAGE 5 — Container Image Scan
 # ==================================================
