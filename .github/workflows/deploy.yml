@@ -125,10 +125,22 @@ jobs:
     needs: build
 
     steps:
+
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Select correct ACR based on branch
+      - name: Select ACR
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            echo "ACR_NAME=$DEV_ACR_NAME" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=$DEV_ACR_LOGIN_SERVER" >> $GITHUB_ENV
+          else
+            echo "ACR_NAME=$PROD_ACR_NAME" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=$PROD_ACR_LOGIN" >> $GITHUB_ENV
+          fi
 
       - name: Login to ACR
         run: |
