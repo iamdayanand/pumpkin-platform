@@ -79,7 +79,7 @@ jobs:
       uses: azure/get-keyvault-secrets@v1
       with:
         keyvault: ${{ env.KEYVAULT_NAME }}
-        secrets: ACR_LOGIN_SERVER
+        secrets: acr-login-server
 
     - name: Login to ACR
       run: |
