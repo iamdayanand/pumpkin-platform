@@ -94,7 +94,7 @@ jobs:
       # Terraform Plan
       # -----------------------------
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -var="location=westeurope"
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
@@ -189,7 +189,7 @@ jobs:
       # Terraform Plan
       # -----------------------------
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -var="location=westeurope"
         env:
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ env.ARM_CLIENT_SECRET }}
