@@ -155,13 +155,13 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
             helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-              --atomic \
+              --rollback-on-failure \
               --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
               --set image.tag=${{ github.sha }} \
               -f helm/pumpkin-api/values-dev.yaml
           else
             helm upgrade --install pumpkin-api ./helm/pumpkin-api \
-              --atomic \
+              --rollback-on-failure \
               --set image.repository=$ACR_LOGIN_SERVER/$IMAGE_NAME \
               --set image.tag=${{ github.sha }} \
               -f helm/pumpkin-api/values-prod.yaml
