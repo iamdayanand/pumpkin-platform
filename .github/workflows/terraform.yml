@@ -50,7 +50,7 @@ jobs:
         uses: azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEYVAULT_NAME }}
-          secrets: arm_client_id,arm_client_secret
+          secrets: arm-client-id,arm-client-secret
 
       # -----------------------------
       # Terraform Init
@@ -144,7 +144,7 @@ jobs:
         uses: azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ env.KEYVAULT_NAME }}
-          secrets: arm_client_id,arm_client_secret
+          secrets: arm-client-id,arm-client-secret
 
       # -----------------------------
       # Terraform Init
