@@ -7,10 +7,7 @@ on:
       - main
     paths:
       - "terraform/**"
-      - ".github/workflows/terraform.yml"
-
-
-      
+      - ".github/workflows/terraform.yml"      
 env:
   KEYVAULT_NAME: pumpkin-kv
   ARM_SUBSCRIPTION_ID: 82ffa9ee-9851-4b3e-9a19-4382b0bf394a
