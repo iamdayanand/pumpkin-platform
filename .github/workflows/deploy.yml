@@ -83,11 +83,11 @@ jobs:
       - name: Select ACR
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
-            ACR_NAME=pumpkindevacr
-            ACR_LOGIN_SERVER=pumpkindevacr.azurecr.io
+            echo "ACR_NAME=pumpkindevacr" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=pumpkindevacr.azurecr.io" >> $GITHUB_ENV
           else
-            ACR_NAME=pumpkinprodacr
-            ACR_LOGIN_SERVER=pumpkinprodacr.azurecr.io
+            echo "ACR_NAME=pumpkinprodacr" >> $GITHUB_ENV
+            echo "ACR_LOGIN_SERVER=pumpkinprodacr.azurecr.io" >> $GITHUB_ENV
           fi
 
       # ---------------------------------
