@@ -216,6 +216,8 @@ The Terraform pipeline provisions the following Azure resources:
 
 - Azure Container Registry (ACR)
 
+- Terraform State Locking (Azure Storage + Blob locking)
+
 Infrastructure is organized using Terraform modules and environment-specific configuration.
 
 ### Environment Configuration
