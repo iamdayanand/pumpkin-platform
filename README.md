@@ -170,7 +170,7 @@ This architecture focuses on security, modular infrastructure design, and DevSec
 
 ---
 
-## * Infrastructure Deployment
+## * Automated Infrastructure Deployment
 
 Infrastructure for this platform is provisioned using **Terraform** and deployed through a **GitHub Actions CI/CD pipeline (`terraform.yml`)**.
 
@@ -191,14 +191,15 @@ This ensures infrastructure changes are **automatically validated, security-chec
 
 ### Triggering the Infrastructure Deployment
 
-The Terraform pipeline is triggered automatically when changes are pushed to the Terraform directory.
+The Terraform pipeline is triggered automatically when changes are pushed to the terraform.yml pipeline.
 
-Example workflow:
+Example workflow(main: prod and dev branch : dev):
 
 ```bash
-git add terraform/
+git checkout dev ## changing from main to dev branch
+git add .github/workflows/terraform.yml
 git commit -m "update infrastructure"
-git push origin main
+git push 
 ```
 
 ### Infrastructure Components Provisioned
@@ -229,7 +230,7 @@ Each environment uses separate Terraform variables while sharing the same infras
 
 ---
 
-## * Application Deployment (Helm)
+## * Automated Application Deployment (Helm)
 
 After the infrastructure has been provisioned (AKS cluster and Azure Container Registry), the application is deployed to Kubernetes using **Helm**.
 
@@ -250,7 +251,10 @@ Deployment is automated through the **CI/CD pipeline**, which builds the contain
 The Helm chart for the application is located in:
 
 ```bash
-helm/pumpkin-api
+git checkout dev ## changing from main to dev branch
+git add .github/workflows/deploy.yml
+git commit -m "update application deployment"
+git push 
 ```
 
 ### Automatically CI/CD Deployment Process
@@ -271,39 +275,6 @@ helm upgrade --install pumpkin-api ./helm/pumpkin-api \
   --set image.tag=<commit-sha> \
   -f helm/pumpkin-api/values-prod.yaml
 ```
-
-### Manual application process by connect to the AKS Cluster
-
-Retrieve the Kubernetes credentials for the AKS cluster:
-
-```bash
-az aks get-credentials --resource-group pumpkin-dev-rg --name pumpkin-dev-aks
-```
-```bash
-az aks get-credentials --resource-group pumpkin-dev-rg --name pumpkin-prod-aks
-```
-Verify cluster access:
-
-```bash
-kubectl get nodes
-```
-### Deploy the Application with Helm
-
-Navigate to the Helm chart directory:
-```bash
-cd helm/pumpkin-api
-```
-Deploy the application using the dev environment configuration dev or prod:
-
-```bash
-helm upgrade --install pumpkin-api . -f values-dev.yaml
-```
-
-```bash
-helm upgrade --install pumpkin-api . -f values-prod.yaml
-```
-
-This command will create or update the Kubernetes resources defined in the Helm chart.
 
 ### Verify Deployment
 
@@ -555,3 +526,40 @@ These improvements would strengthen the platform across key areas including:
 
 While the current solution demonstrates the architectural foundations, these enhancements would make the platform fully ready for **production-grade deployment in a real-world environment**.
 
+<hr style="height:3px;border:none;color:#333;background-color:#333;" />
+
+## Extras:
+
+I have implemented a **DevSecOps approach across both Terraform-based infrastructure provisioning and the application deployment CI/CD pipeline. Security, compliance, and quality checks are integrated directly into the automation workflow. This ensures infrastructure and applications are validated through automated scanning, policy enforcement, and secure deployment processes before reaching production environments.
+
+### Automation of Terraform provision :
+
+The Terraform pipeline automates infrastructure provisioning through a secure DevSecOps workflow. It performs Terraform initialization, validation, linting with TFLint, and security scanning using Checkov before executing plan and apply stages. The pipeline authenticates with Azure and retrieves secrets from Key Vault to provision cloud resources such as Resource Groups, Azure Kubernetes Service (AKS), networking components, and supporting infrastructure.
+
+<img src="docs/Terraform.png" width="800" alt="Terraform Provision">
+
+### Automation of Application Deployment:
+
+The application deployment pipeline automates build, security, and delivery processes through a DevSecOps CI/CD workflow. It performs security checks, Dockerfile linting, application build, and container vulnerability scanning before deploying the application. This automated pipeline ensures consistent builds, secure container images, and reliable deployment to the target Kubernetes environment.
+
+<img src="docs/application_deploy.png" width="800" alt="Application Deployment">
+
+### Hosting application on http://localhost:8082 :
+
+The Pumpkin Platform Demo shows a containerized application successfully deployed on Azure Kubernetes Service (AKS) using Helm. The CI/CD pipeline automates the build, security scanning, container image creation, and deployment process, ensuring consistent and reliable releases. The Kubernetes cluster runs the application as a pod (**pumpkin-api**) with a ClusterIP service exposing port 80 internally. Using kubectl **port-forward**, the service is mapped to **localhost:8082**, allowing local access to the running application. The screenshot demonstrates operational verification through Kubernetes commands such as **kubectl get pods** and **kubectl get svc**, confirming the application is running and accessible within the cluster
+
+<img src="docs/localhost.png" width="800" alt="Application Deployment">
+
+### Hosting application with Ingress Nginx Controller :
+
+The application is exposed externally using the NGINX Ingress Controller deployed on Azure Kubernetes Service (AKS). First, the NGINX Ingress Helm repository is added and updated, and the ingress controller is installed using Helm in the ingress-nginx namespace with the service type configured as LoadBalancer. This automatically provisions an Azure public load balancer and external IP address. After deployment, the controller status is verified using kubectl get svc -n ingress-nginx, confirming that the external IP has been assigned. An Ingress resource is then configured to route external traffic to the pumpkin-api service running inside the cluster. The kubectl get ingress command shows that the application is mapped to the public IP address. Finally, accessing the external IP in a browser successfully loads the Pumpkin Platform Demo application, demonstrating that the CI/CD pipeline, Helm deployment, Kubernetes services, and ingress routing are working correctly.
+
+<img src="docs/ingress-nginx-install-1.png" width="800" alt="Application Deployment">
+
+<img src="docs/ingress-nginx-install-2.png" width="800" alt="Application Deployment">
+
+<img src="docs/nginxcontroller-host-3.png" width="800" alt="Application Deployment">
+
+Summary: 
+
+This project demonstrates a complete cloud-native DevSecOps platform deployment on Azure Kubernetes Service (AKS). Infrastructure is provisioned using Terraform with automated security and compliance checks, while the application is built, scanned, and deployed through a CI/CD pipeline. The containerized application is deployed using Helm and exposed externally through an NGINX Ingress Controller with an Azure Load Balancer. Security scanning, infrastructure validation, and automated deployments ensure reliable and secure delivery. The project showcases a fully automated Infrastructure as Code and DevSecOps workflow for modern cloud applications.
