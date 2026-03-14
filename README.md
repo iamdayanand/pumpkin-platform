@@ -12,7 +12,7 @@ This repository contains a cloud-native platform deployment designed to run a co
 
 The platform is designed as a secure and scalable cloud-native deployment on Microsoft Azure. It uses Infrastructure as Code, Kubernetes orchestration, and DevSecOps pipelines.
 
-### Key components include:
+### Key components included:
 
 • Azure Virtual Network (VNet)  
 Provides network isolation and hosts the AKS subnet.
@@ -193,7 +193,17 @@ This ensures infrastructure changes are **automatically validated, security-chec
 
 The Terraform pipeline is triggered automatically when changes are pushed to the terraform.yml pipeline.
 
-Example workflow(main: prod and dev branch : dev):
+Example workflow:
+
+prod = main
+
+```bash
+git checkout main ## changing from dev to main branch
+git add .github/workflows/terraform.yml
+git commit -m "update infrastructure"
+git push 
+```
+dev = dev branch
 
 ```bash
 git checkout dev ## changing from main to dev branch
@@ -201,6 +211,7 @@ git add .github/workflows/terraform.yml
 git commit -m "update infrastructure"
 git push 
 ```
+With this pipeline trigger, the Terraform pipeline provisions the infrastructure automatically in the respective environments.
 
 ### Infrastructure Components Provisioned
 
@@ -252,17 +263,30 @@ Deployment is automated through the **CI/CD pipeline**, which builds the contain
 
 The Helm chart for the application is located in:
 
+Prod:
+
+```bash
+git checkout main ## changing from dev to main branch
+git add .github/workflows/deploy.yml
+git commit -m "update application deployment"
+git push 
+```
+Dev:
+
 ```bash
 git checkout dev ## changing from main to dev branch
 git add .github/workflows/deploy.yml
 git commit -m "update application deployment"
 git push 
 ```
+With this pipeline trigger, the application is automatically built, pushed to the container registry, and deployed to the respective Kubernetes environment.
 
 ### Automatically CI/CD Deployment Process
 The CI/CD pipeline automatically deploys the application to Azure Kubernetes Service (AKS) after building the container image.
 
-The pipeline performs the Helm deployment using the following command which is mentioned in the CI/CD pipeline for dev
+The pipeline performs the Helm deployment using the following command which is mentioned in the CI/CD pipeline for dev/prod:
+
+For dev deployments:
 ```bash
 helm upgrade --install pumpkin-api ./helm/pumpkin-api \
   --set image.repository=<ACR_LOGIN_SERVER>/pumpkin-api \
@@ -270,7 +294,7 @@ helm upgrade --install pumpkin-api ./helm/pumpkin-api \
   -f helm/pumpkin-api/values-dev.yaml
 ```
 
-For production deployments:
+For prod deployments:
 ```bash
 helm upgrade --install pumpkin-api ./helm/pumpkin-api \
   --set image.repository=<ACR_LOGIN_SERVER>/pumpkin-api \
