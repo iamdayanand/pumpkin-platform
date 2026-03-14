@@ -186,6 +186,7 @@ jobs:
       - name: Helm Deploy DEV
         run: |
           helm upgrade --install pumpkin-api ./helm/pumpkin-api \
+            --automic \
             --wait \
             --timeout 10m \
             --rollback-on-failure \
@@ -227,6 +228,7 @@ jobs:
       - name: Helm Deploy PROD
         run: |
           helm upgrade --install pumpkin-api ./helm/pumpkin-api \
+            --atomic \
             --wait \
             --timeout 10m \
             --rollback-on-failure \
