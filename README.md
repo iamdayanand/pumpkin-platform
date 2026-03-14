@@ -1,4 +1,4 @@
-# Pumpkin Platform – Cloud Engineer Case Study
+# This repository demonstrates a cloud-native platform deployment on Microsoft Azure using Terraform, Kubernetes, Helm, and DevSecOps CI/CD pipelines.
 
 ## Overview
 
