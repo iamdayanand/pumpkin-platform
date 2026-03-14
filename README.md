@@ -544,7 +544,7 @@ The Terraform pipeline automates infrastructure provisioning through a secure De
 
 The application deployment pipeline automates build, security, and delivery processes through a DevSecOps CI/CD workflow. It performs security checks, Dockerfile linting, application build, and container vulnerability scanning before deploying the application. This automated pipeline ensures consistent builds, secure container images, and reliable deployment to the target Kubernetes environment.
 
-<img src="docs/application_deploy.png" width="800" alt="Application Deployment">
+<img src="docs/application_deployment_dev_and_prod.png" width="800" alt="Application Deployment">
 
 ### Hosting application on http://localhost:8082 :
 
