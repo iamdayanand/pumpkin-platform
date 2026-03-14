@@ -73,11 +73,11 @@ This setup lets us route traffic from one spot, handle security (TLS), and make 
 
 I have using an **NGINX/Traefik Ingress Controller** to manage incoming web traffic.
 
-External traffic enters the platform through an Azure Load Balancer. Requests are forwarded to the NGINX Ingress Controller inside the AKS cluster, which routes traffic to the appropriate Kubernetes service and application pods.
+External traffic enters the platform through Azure Application Gateway or Azure Front Door, which forwards requests to the ingress layer inside the private AKS cluster. The ingress controller routes requests to the appropriate Kubernetes service, which then forwards traffic to the Pumpkin API pods.
 
 Here’s how traffic flows:
 
-Internet User  → Azure Load Balancer  → NGINX/Traefik Ingress Controller  → Kubernetes Service (ClusterIP)  → Pumpkin API Pods
+Internet → Azure Application Gateway / Front Door → Ingress Controller → Kubernetes Service → Pumpkin API Pods
 
 <img src="docs/k8s-workload.png" width="500" alt="Traffic Flow">
 
