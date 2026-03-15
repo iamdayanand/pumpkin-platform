@@ -564,6 +564,18 @@ The Terraform pipeline automates infrastructure provisioning through a secure De
 
 <img src="docs/Terraform.png" width="800" alt="Terraform Provision">
 
+Azure KeyVault:
+
+<img src="docs/azurekeyvault.png" width="800" alt="Azure KeyVault">
+
+Resource Group Created:
+
+<img src="docs/ResourceGroup.png" width="800" alt="Resource Group">
+
+Statefile Backend: 
+
+<img src="docs/tfstatebackend.png" width="800" alt="Statefile Backend">
+
 ### Automation of Application Deployment:
 
 The application deployment pipeline automates build, security, and delivery processes through a DevSecOps CI/CD workflow. It performs security checks, Dockerfile linting, application build, and container vulnerability scanning before deploying the application. This automated pipeline ensures consistent builds, secure container images, and reliable deployment to the target Kubernetes environment.
