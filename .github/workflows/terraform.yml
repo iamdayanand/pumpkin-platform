@@ -195,7 +195,7 @@ jobs:
             -var="location=westeurope"
 
           terraform show -json tfplan.binary > tfplan.json
-          
+
         env:
           ARM_CLIENT_ID: ${{ steps.kv.outputs.arm-client-id }}
           ARM_CLIENT_SECRET: ${{ steps.kv.outputs.arm-client-secret }}
@@ -222,12 +222,21 @@ jobs:
             "data.terraform.security.deny" > result.txt
             
           cat result.txt
+
           if grep -q "Public IP is not allowed" result.txt; then
             echo "❌ Policy violation detected. Failing pipeline."
             exit 1
           else
             echo "✅ Policy check passed."
           fi
+
+          if grep -q "\[" result.txt && ! grep -q "\[\]" result.txt; then
+            echo "❌ Policy violations detected. Failing pipeline."
+            exit 1
+          else
+            echo "✅ Policy check passed."
+          fi
+            
       # -----------------------------
       # Terraform Apply
       # -----------------------------
