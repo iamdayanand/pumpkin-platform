@@ -14,6 +14,10 @@ resource "azurerm_resource_group" "rg" {
 
 }
 
+resource "azurerm_public_ip" "example" {
+  name = "my-public-ip"
+}
+
 module "network" {
 
   source = "../../modules/network"

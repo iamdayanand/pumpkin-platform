@@ -186,13 +186,42 @@ jobs:
       # Terraform Plan
       # -----------------------------
       - name: Terraform Plan
-        run: terraform plan -input=false -lock-timeout=5m -var="location=westeurope"
+        # run: terraform plan -input=false -lock-timeout=5m -var="location=westeurope"
+        run: |
+          terraform plan -out=tfplan.binary -input=flase -loc-timerout=5m -var="location=westeurope"
+          terraform show -json tfplan.binary > tfplan.json
         env:
           ARM_CLIENT_ID: ${{ steps.kv.outputs.arm-client-id }}
           ARM_CLIENT_SECRET: ${{ steps.kv.outputs.arm-client-secret }}
           ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
 
+      # -----------------------------
+      # OPA policy check
+      # -----------------------------
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
+          sudo mv opa /usr/local/bin/   
+          
+      # -----------------------------
+      # Opa check
+      # -----------------------------
+      - name: OPA Checking
+        run: |
+          opa eval --format pretty \
+            --input tfplan.json \
+            --data policy/terraform.rego \
+            "data.terraform.security.deny" > result.txt
+            
+          cat result.txt
+          if grep -q "Public IP is not allowed" result.txt; then
+            echo "❌ Policy violation detected. Failing pipeline."
+            exit 1
+          else
+            echo "✅ Policy check passed."
+          fi
       # -----------------------------
       # Terraform Apply
       # -----------------------------
