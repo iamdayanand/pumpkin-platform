@@ -214,23 +214,18 @@ jobs:
       # -----------------------------
       # Opa check
       # -----------------------------
-      - name: OPA Checking
+      - name: OPA Policy Check
         run: |
-          opa eval --format pretty \
+          RESULT=$(opa eval --format json \
             --input tfplan.json \
             --data policy/terraform.rego \
-            "data.terraform.security.deny" > result.txt
-            
-          cat result.txt
+            "data.terraform.security.deny")
 
-          if grep -q "Public IP is not allowed" result.txt; then
-            echo "❌ Policy violation detected. Failing pipeline."
-            exit 1
-          else
-            echo "✅ Policy check passed."
-          fi
+          echo "$RESULT"
 
-          if grep -q "\[" result.txt && ! grep -q "\[\]" result.txt; then
+          COUNT=$(echo "$RESULT" | jq '.result[0].expressions[0].value | length')
+
+          if [ "$COUNT" -gt 0 ]; then
             echo "❌ Policy violations detected. Failing pipeline."
             exit 1
           else
