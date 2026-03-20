@@ -188,8 +188,14 @@ jobs:
       - name: Terraform Plan
         # run: terraform plan -input=false -lock-timeout=5m -var="location=westeurope"
         run: |
-          terraform plan -out=tfplan.binary -input=flase -loc-timerout=5m -var="location=westeurope"
+          terraform plan \
+            -out=tfplan.binary \
+            -input=false \
+            -lock-timeout=5m \
+            -var="location=westeurope"
+
           terraform show -json tfplan.binary > tfplan.json
+          
         env:
           ARM_CLIENT_ID: ${{ steps.kv.outputs.arm-client-id }}
           ARM_CLIENT_SECRET: ${{ steps.kv.outputs.arm-client-secret }}
