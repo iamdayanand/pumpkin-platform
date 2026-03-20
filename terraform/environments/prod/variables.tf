@@ -11,5 +11,6 @@ variable "tags" {
   default = {
     project = "pumpkin-platform"
     env     = "prod"
+    environment = "prod"
   }
 }
